@@ -5,91 +5,79 @@ var ctx;
 var canvas;
 var img;
 var glitchesArray = [];
+let canvasWidth;
+let canvasHeight;
 
 export default function Home() {
   useEffect(() => {
-    img = document.createElement("img");
-    img.src = 'https://images.genius.com/626ddf4c88de200d9487bb42449d1ae3.1000x1000x1.png';
-    canvas = document.getElementById("canvas");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx = canvas.getContext("2d");
-
-    setupGlitches();
     onGenerateClick()
   });
 
-  function Glitch(img, sourceX, sourceY, imgWidth, glitchHeight, destinationX) {
+  function Glitch(img, sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
     this.img = img;
     this.sourceX = sourceX;
     this.sourceY = sourceY;
-    this.imgWidth = imgWidth;
+    this.glitchWidth = glitchWidth;
     this.glitchHeight = glitchHeight
-    this.startX = randomNum(0, 1) ? 0 : imgWidth; // Animate glitch in from both left and right
     this.destinationX = destinationX;
 
-    this.animate = () => {
+    this.draw = () => {
       ctx.drawImage(
         this.img, 
         this.sourceX,
         this.sourceY,
-        this.imgWidth,
+        this.glitchWidth,
         this.glitchHeight,
-        this.startX, // incrementor
+        this.destinationX,
         this.sourceY,
-        this.imgWidth,
+        this.glitchWidth,
         this.glitchHeight
       )
-
-      if (this.startX < this.destinationX) {
-        this.startX++;
-      } else {
-        this.startX--;
-      }
     }
   }
 
   function setupGlitches() {
     let sourceY = 0;
-    const glitchHeight = 20;
-    const amountOfGlitches = window.innerHeight / glitchHeight;
+    const glitchHeight = 10;
+    const amountOfGlitches = canvasHeight / glitchHeight;
 
     for (let i = 0; i < amountOfGlitches; i++) {
       let img = document.createElement("img");
       img.src = 'https://images.genius.com/626ddf4c88de200d9487bb42449d1ae3.1000x1000x1.png';
 
-      let imgWidth = randomNum(100, window.innerWidth);
-      let destinationX = randomNum(0, 300);
       let sourceX = randomNum(0, 300);
+      let glitchWidth = randomNum(100, canvasWidth);
+      let destinationX = randomNum(0, canvasWidth / 2);
 
-      glitchesArray[i] = new Glitch(img, sourceX, sourceY, imgWidth, glitchHeight, destinationX) 
-      
+      glitchesArray[i] = new Glitch(img, sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
       sourceY = sourceY + glitchHeight;
     } 
   }
 
   function onGenerateClick() {
-    setupGlitches();
     img = document.createElement("img");
     img.src = 'https://images.genius.com/626ddf4c88de200d9487bb42449d1ae3.1000x1000x1.png';
     canvas = document.getElementById("canvas");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+
+    canvasWidth = img.width
+    canvasHeight = img.height;
+    canvas.width = img.width;
+    canvas.height = img.height;
+
     ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
-    // ctx.globalAlpha = randomNum(6, 10) * 0.1;
-    // ctx.globalCompositeOperation = "difference";
-    animateGlitches()
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+    
+    ctx.globalAlpha = randomNum(6, 10) * 0.1;
+    ctx.globalCompositeOperation = "darken";
+
+    setupGlitches();
+    drawGlitches()
   }
 
-  function animateGlitches() {
-    requestAnimationFrame(animateGlitches);
-
+  function drawGlitches() {
     glitchesArray.forEach((glitch) => {
-      // One the startX and destinationX meet the glitch will stop animating
-      if (glitch.startX !== glitch.destinationX) {
-        glitch.animate();
-      }
+      glitch.draw();
     });
   }
 
