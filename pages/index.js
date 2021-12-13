@@ -1,16 +1,40 @@
 import Head from 'next/head'
-import {useEffect} from "react";
+import { useEffect, useState } from "react";
 
 var ctx;
 var canvas;
 var img;
 var glitchesArray = [];
-let canvasWidth;
-let canvasHeight;
+var canvasWidth;
+var canvasHeight;
 
 export default function Home() {
+  const blendingModes = [
+    "difference",
+    "source-atop",
+    "source-over",
+    "destination-out",
+    "multiply",
+    "screen",
+    "overlay",
+    "darken",
+    "lighten",
+    "color-dodge",
+    "color-burn",
+    "exclusion",
+    "hue",
+    "saturation",
+    "luminosity"
+  ];
+
+  const [blendingMode, setBlendingMode] = useState(blendingModes[0]);
+  const [opacity, setOpacity] = useState(0.8);
+  const [amountOfGlitches, setGlitchesAmount] = useState(40);
+
+  const imgSrc = "https://picdit.files.wordpress.com/2016/04/erik-jones-art-7.png"
+
   useEffect(() => {
-    onGenerateClick()
+      onGenerateClick();
   });
 
   function Glitch(img, sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
@@ -37,26 +61,27 @@ export default function Home() {
   }
 
   function setupGlitches() {
+    glitchesArray = [];
     let sourceY = 0;
-    const glitchHeight = 10;
-    const amountOfGlitches = canvasHeight / glitchHeight;
+    let glitchHeight = canvasHeight / amountOfGlitches
 
     for (let i = 0; i < amountOfGlitches; i++) {
       let img = document.createElement("img");
-      img.src = 'https://images.genius.com/626ddf4c88de200d9487bb42449d1ae3.1000x1000x1.png';
+      img.src = imgSrc;
 
       let sourceX = randomNum(0, 300);
       let glitchWidth = randomNum(100, canvasWidth);
       let destinationX = randomNum(0, canvasWidth / 2);
 
-      glitchesArray[i] = new Glitch(img, sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
-      sourceY = sourceY + glitchHeight;
+      glitchesArray[i] = new Glitch(img, sourceX, sourceY, glitchWidth, Number(glitchHeight), destinationX) 
+      sourceY = sourceY + Number(glitchHeight);
     } 
   }
 
   function onGenerateClick() {
+    console.log("calling generate")
     img = document.createElement("img");
-    img.src = 'https://images.genius.com/626ddf4c88de200d9487bb42449d1ae3.1000x1000x1.png';
+    img.src = imgSrc;
     canvas = document.getElementById("canvas");
 
     canvasWidth = img.width
@@ -68,8 +93,8 @@ export default function Home() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight)
     ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
     
-    ctx.globalAlpha = randomNum(6, 10) * 0.1;
-    ctx.globalCompositeOperation = "darken";
+    ctx.globalAlpha = Number(opacity);
+    ctx.globalCompositeOperation = blendingMode;
 
     setupGlitches();
     drawGlitches()
@@ -81,6 +106,18 @@ export default function Home() {
     });
   }
 
+  function handleCompositeOperationChange(event) {
+    setBlendingMode(event.target.value);
+  }
+  
+  function handleOpacityChange(event) {
+    setOpacity(event.target.value);
+  }
+
+  function handleGlitchesAmountChange(event) {
+    setGlitchesAmount(event.target.value);
+  }
+  
   function randomNum(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
@@ -93,9 +130,41 @@ export default function Home() {
       </Head>
       <main>
         <canvas id="canvas"></canvas>
-        <button className="generate-button" onClick={onGenerateClick}>
-          GENERATE
-        </button>
+        <div className="controls">
+          <h1>glitchy image generator</h1>
+          <select
+            className="blending-input input"
+            value={blendingMode}
+            name="blending-mode"
+            onChange={handleCompositeOperationChange}
+          >
+            {blendingModes.map((mode) => {
+              return <option value={mode} key={mode}>{mode}</option>
+            })}
+          </select>
+          <input
+            type="number"
+            className="input"
+            name="opacity"
+            min="0"
+            max="1"
+            step="0.1"
+            placeholder="Between 0 and 1"
+            value={opacity}
+            onChange={handleOpacityChange}>
+          </input>
+          <input
+            type="number"
+            className="input"
+            name="opacity"
+            min="1"
+            value={amountOfGlitches}
+            onChange={handleGlitchesAmountChange}>
+          </input>
+          <button className="generate-button" onClick={onGenerateClick}>
+            generate
+          </button>
+        </div>
       </main>
     </div>
   )
