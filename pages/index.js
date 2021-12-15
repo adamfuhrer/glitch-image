@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import { useEffect, useState } from "react";
+import Slider from '@mui/material/Slider';
 
 var ctx;
 var canvas;
@@ -34,7 +35,7 @@ export default function Home() {
   const imgSrc = "https://picdit.files.wordpress.com/2016/04/erik-jones-art-7.png"
 
   useEffect(() => {
-      onGenerateClick();
+    onGenerateClick();
   });
 
   function Glitch(img, sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
@@ -70,7 +71,7 @@ export default function Home() {
       img.src = imgSrc;
 
       let sourceX = randomNum(0, 300);
-      let glitchWidth = randomNum(100, canvasWidth);
+      let glitchWidth = randomNum(20, canvasWidth);
       let destinationX = randomNum(0, canvasWidth / 2);
 
       glitchesArray[i] = new Glitch(img, sourceX, sourceY, glitchWidth, Number(glitchHeight), destinationX) 
@@ -82,23 +83,46 @@ export default function Home() {
     console.log("calling generate")
     img = document.createElement("img");
     img.src = imgSrc;
-    canvas = document.getElementById("canvas");
-
-    canvasWidth = img.width
-    canvasHeight = img.height;
-    canvas.width = img.width;
-    canvas.height = img.height;
-
-    ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
     
-    ctx.globalAlpha = Number(opacity);
-    ctx.globalCompositeOperation = blendingMode;
-
-    setupGlitches();
-    drawGlitches()
+    img.onload = () => {
+      canvas = document.getElementById("canvas");
+      canvasWidth = img.width
+      canvasHeight = img.height;
+      canvas.width = img.width;
+      canvas.height = img.height;
+  
+      ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+      
+      ctx.globalAlpha = Number(opacity);
+      ctx.globalCompositeOperation = blendingMode;
+  
+      setupGlitches();
+      drawGlitches()
+    }
   }
+
+  // function onDownloadClick() {
+  //   let link = document.createElement('a')
+  //   canvas.setAttribute("crossOrigin",  "anonymous")
+
+  //   canvas.toBlob(function(blob) {
+  //     link.setAttribute(
+  //       'download',
+  //       'tri-' + Math.round(new Date().getTime() / 1000) + '.png'
+  //     )
+  
+  //     link.setAttribute('href', URL.createObjectURL(blob))
+  //     link.dispatchEvent(
+  //       new MouseEvent('click', {
+  //         bubbles: true,
+  //         cancelable: true,
+  //         view: window,
+  //       })
+  //     )
+  //   })
+  // }
 
   function drawGlitches() {
     glitchesArray.forEach((glitch) => {
@@ -127,11 +151,15 @@ export default function Home() {
       <Head>
         <title>Glitch Image Generator</title>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet"/>
       </Head>
       <main>
         <canvas id="canvas"></canvas>
         <div className="controls">
           <h1>glitchy image generator</h1>
+          <div className="label">blending mode</div> 
           <select
             className="blending-input input"
             value={blendingMode}
@@ -142,28 +170,31 @@ export default function Home() {
               return <option value={mode} key={mode}>{mode}</option>
             })}
           </select>
-          <input
-            type="number"
-            className="input"
-            name="opacity"
-            min="0"
-            max="1"
-            step="0.1"
+          <div className="label">amount of glitches</div> 
+          <Slider
+            onChange={handleGlitchesAmountChange}
+            min={0}
+            max={100}
+            valueLabelDisplay="auto"
+            defaultValue={30}
+          />
+          <div className="label">glitch opacity</div> 
+          <Slider
+            onChange={handleOpacityChange}
+            min={0}
+            max={1}
+            step={0.1}
             placeholder="Between 0 and 1"
-            value={opacity}
-            onChange={handleOpacityChange}>
-          </input>
-          <input
-            type="number"
-            className="input"
-            name="opacity"
-            min="1"
-            value={amountOfGlitches}
-            onChange={handleGlitchesAmountChange}>
-          </input>
+            valueLabelDisplay="auto"
+            defaultValue={0.4}
+          />
+          <div className="buttons-wrapper"></div>
           <button className="generate-button" onClick={onGenerateClick}>
             generate
           </button>
+          {/* <button className="generate-button" onClick={onDownloadClick}>
+            download
+          </button> */}
         </div>
       </main>
     </div>
