@@ -4,7 +4,6 @@ import Slider from '@mui/material/Slider';
 
 var ctx;
 var canvas;
-var img;
 var glitchesArray = [];
 var canvasWidth;
 var canvasHeight;
@@ -31,8 +30,7 @@ export default function Home() {
   const [blendingMode, setBlendingMode] = useState(blendingModes[0]);
   const [opacity, setOpacity] = useState(0.8);
   const [amountOfGlitches, setGlitchesAmount] = useState(40);
-
-  const imgSrc = "https://picdit.files.wordpress.com/2016/04/erik-jones-art-7.png"
+  const [imgSrc, setImgSrc] = useState("https://picdit.files.wordpress.com/2016/04/erik-jones-art-7.png");
 
   useEffect(() => {
     onGenerateClick();
@@ -81,7 +79,7 @@ export default function Home() {
 
   function onGenerateClick() {
     console.log("calling generate")
-    img = document.createElement("img");
+    let img = document.createElement("img");
     img.src = imgSrc;
     
     img.onload = () => {
@@ -99,30 +97,54 @@ export default function Home() {
       ctx.globalCompositeOperation = blendingMode;
   
       setupGlitches();
-      drawGlitches()
+      drawGlitches();
     }
   }
 
-  // function onDownloadClick() {
-  //   let link = document.createElement('a')
-  //   canvas.setAttribute("crossOrigin",  "anonymous")
+  function onDownloadClick() {
+    let link = document.createElement('a')
 
-  //   canvas.toBlob(function(blob) {
-  //     link.setAttribute(
-  //       'download',
-  //       'tri-' + Math.round(new Date().getTime() / 1000) + '.png'
-  //     )
+    canvas.toBlob(function(blob) {
+      link.setAttribute(
+        'download',
+        'glitch-image-' + Math.round(new Date().getTime() / 1000) + '.png'
+      )
   
-  //     link.setAttribute('href', URL.createObjectURL(blob))
-  //     link.dispatchEvent(
-  //       new MouseEvent('click', {
-  //         bubbles: true,
-  //         cancelable: true,
-  //         view: window,
-  //       })
-  //     )
-  //   })
-  // }
+      link.setAttribute('href', URL.createObjectURL(blob))
+      link.dispatchEvent(
+        new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        })
+      )
+    })
+  }
+
+  function loadImage() {
+    let input = document.querySelector('#file-input')
+    
+    function handleChange(e) {
+      for (let item of this.files) {
+        if (item.type.indexOf('image') < 0) {
+          continue
+        }
+        let src = URL.createObjectURL(item)
+        setImgSrc(src);
+        onGenerateClick();
+        this.removeEventListener('change', handleChange)
+      }
+    }
+
+    input.addEventListener('change', handleChange)
+    input.dispatchEvent(
+      new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      })
+    )
+  }
 
   function drawGlitches() {
     glitchesArray.forEach((glitch) => {
@@ -159,43 +181,60 @@ export default function Home() {
         <canvas id="canvas"></canvas>
         <div className="controls">
           <h1>glitchy image generator</h1>
-          <div className="label">blending mode</div> 
-          <select
-            className="blending-input input"
-            value={blendingMode}
-            name="blending-mode"
-            onChange={handleCompositeOperationChange}
-          >
-            {blendingModes.map((mode) => {
-              return <option value={mode} key={mode}>{mode}</option>
-            })}
-          </select>
-          <div className="label">amount of glitches</div> 
-          <Slider
-            onChange={handleGlitchesAmountChange}
-            min={0}
-            max={100}
-            valueLabelDisplay="auto"
-            defaultValue={30}
-          />
-          <div className="label">glitch opacity</div> 
-          <Slider
-            onChange={handleOpacityChange}
-            min={0}
-            max={1}
-            step={0.1}
-            placeholder="Between 0 and 1"
-            valueLabelDisplay="auto"
-            defaultValue={0.4}
-          />
+          <div className="input-wrapper">
+            <div className="label">blending mode</div> 
+            <select
+              className="blending-input input"
+              value={blendingMode}
+              name="blending-mode"
+              onChange={handleCompositeOperationChange}
+            >
+              {blendingModes.map((mode) => {
+                return <option value={mode} key={mode}>{mode}</option>
+              })}
+            </select>
+          </div>
+
+          <div className="input-wrapper">
+            <div className="label">amount of glitches</div>
+            <Slider
+              onChange={handleGlitchesAmountChange}
+              min={0}
+              max={400}
+              valueLabelDisplay="auto"
+              value={amountOfGlitches}
+              defaultValue={30}
+            />
+          </div>
+          
+          <div className="input-wrapper">
+            <div className="label">glitch opacity</div> 
+            <Slider
+              onChange={handleOpacityChange}
+              min={0}
+              max={1}
+              step={0.1}
+              placeholder="Between 0 and 1"
+              valueLabelDisplay="auto"
+              defaultValue={0.4}
+            />
+          </div>
           <div className="buttons-wrapper"></div>
           <button className="generate-button" onClick={onGenerateClick}>
             generate
           </button>
-          {/* <button className="generate-button" onClick={onDownloadClick}>
+          <button className="generate-button" onClick={onDownloadClick}>
             download
-          </button> */}
+          </button>
+          <button className="generate-button" onClick={loadImage}>
+            upload
+          </button>
         </div>
+        <input
+          id="file-input"
+          type="file"
+          accept="image/*"
+        />
       </main>
     </div>
   )

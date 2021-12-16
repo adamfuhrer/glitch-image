@@ -5,7 +5,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: 'Fira Code', monospace;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='100%25' width='100%25'%3E%3Cdefs%3E%3Cpattern id='doodad' width='40' height='40' viewBox='0 0 40 40' patternUnits='userSpaceOnUse' patternTransform='rotate(135)'%3E%3Crect width='100%25' height='100%25' fill='rgba(74, 85, 104,1)'/%3E%3Cpath d='M 22 20a 1 1 0 0 0 2 0a 1 1 0 0 0-2 0m1 0a 0 0 0 0 1 0 0a 0 0 0 0 1 0 0zM 18 20a 1 1 0 0 0 2 0a 1 1 0 0 0-2 0m1 0a 0 0 0 0 1 0 0a 0 0 0 0 1 0 0z' fill='rgba(74, 85, 104,1)'/%3E%3Cpath d='M 20 20a 1 1 0 0 0 0 2a 1 1 0 0 0 0-2zM-10-10h 60v 60h-60z' fill='rgba(26, 32, 44,1)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='url(%23doodad)' height='200%25' width='200%25'/%3E%3C/svg%3E ")
+  /* background-color: #222; */
 }
 
 * {
@@ -17,12 +17,12 @@ main {
 }
 
 .controls {
-  position: absolute;
+  position: fixed;
   right: 24px;
   top: 24px;
   border-radius: 5px;
-  width: 240px;
-  background: #d64f4f;
+  width: 260px;
+  background: rgba(34, 34, 34, 0.96);
   padding: 20px;
   z-index: 100;
   box-shadow: var(--box-shadow);
@@ -34,7 +34,7 @@ canvas {
 }
 
 .buttons-wrapper {
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 button {
@@ -63,6 +63,10 @@ button + button {
   margin-top: 20px;
 }
 
+.input-wrapper + .input-wrapper {
+  margin-top: 20px;
+}
+
 .input {
   font-family: 'Fira Code', monospace;
   width: 100%;
@@ -72,27 +76,32 @@ button + button {
   padding-right: 10px;
   border-radius: 5px;
   border: none;
-  margin-bottom: 30px;
   box-shadow: var(--text-shadow);
-  background: rgb(255 255 255 / 30%);
+  background: rgb(255 255 255 / 26%);
   color: white;
 }
 
 h1 {
+  font-family: 'Fira Code', monospace;
   font-size: 28px;
   margin-top: 0;
   padding-bottom: 20px;
+  padding-right: 20px;
   border-bottom: 1px solid rgba(255, 225, 225, 0.5);
   color: #111111;
   margin-bottom: 24px;
   text-shadow: var(--text-shadow);
-  color: rgb(255, 232, 232);
+  color: white;
 }
 
 .label {
   font-size: 14px;
   margin-bottom: 8px;
   font-weight: 500;
-  color: rgb(255, 232, 232);
+  color: white;
   text-shadow: var(--text-shadow);
+}
+
+#file-input {
+  display: none;
 }
