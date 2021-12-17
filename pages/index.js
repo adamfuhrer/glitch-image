@@ -1,12 +1,11 @@
 import Head from 'next/head'
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Slider from '@mui/material/Slider';
+import debounce from 'lodash.debounce';
 
 var ctx;
 var canvas;
 var glitchesArray = [];
-var canvasWidth;
-var canvasHeight;
 
 export default function Home() {
   const blendingModes = [
@@ -29,8 +28,10 @@ export default function Home() {
 
   const [blendingMode, setBlendingMode] = useState(blendingModes[0]);
   const [opacity, setOpacity] = useState(0.8);
-  const [amountOfGlitches, setGlitchesAmount] = useState(40);
+  const [amountOfGlitches, setAmountOfGlitches] = useState(40);
   const [imgSrc, setImgSrc] = useState("https://picdit.files.wordpress.com/2016/04/erik-jones-art-7.png");
+  const [canvasWidth, setCanvasWidth] = useState();
+  const [canvasHeight, setCanvasHeight] = useState();
 
   useEffect(() => {
     onGenerateClick();
@@ -70,7 +71,7 @@ export default function Home() {
 
       let sourceX = randomNum(0, 300);
       let glitchWidth = randomNum(20, canvasWidth);
-      let destinationX = randomNum(0, canvasWidth / 2);
+      let destinationX = randomNum(0, canvasWidth / 1.5);
 
       glitchesArray[i] = new Glitch(img, sourceX, sourceY, glitchWidth, Number(glitchHeight), destinationX) 
       sourceY = sourceY + Number(glitchHeight);
@@ -84,8 +85,14 @@ export default function Home() {
     
     img.onload = () => {
       canvas = document.getElementById("canvas");
-      canvasWidth = img.width
-      canvasHeight = img.height;
+
+      setCanvasWidth(img.width);
+      setCanvasHeight(img.height);
+
+      if (amountOfGlitches > canvasHeight) {
+        setAmountOfGlitches(canvasHeight);
+      }
+
       canvas.width = img.width;
       canvas.height = img.height;
   
@@ -157,12 +164,24 @@ export default function Home() {
   }
   
   function handleOpacityChange(event) {
-    setOpacity(event.target.value);
+    if (event.target.value > 1) {
+      setOpacity(1);
+    } else {
+      setOpacity(Number(event.target.value));
+    }
   }
 
   function handleGlitchesAmountChange(event) {
-    setGlitchesAmount(event.target.value);
+    if (event.target.value > canvasHeight) {
+      setAmountOfGlitches(Number(canvasHeight));
+    } else {
+      setAmountOfGlitches(Number(event.target.value))
+    }
   }
+
+  const debouncedhandleGlitchesAmountChange = useCallback(
+    debounce(handleGlitchesAmountChange, 30)
+  , []);
   
   function randomNum(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
@@ -176,13 +195,13 @@ export default function Home() {
         <link rel="preconnect" href="https://fonts.googleapis.com"/>
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet"/>
       </Head>
       <main>
-        <canvas id="canvas"></canvas>
+        <h1>glitch image generator</h1>
         <div className="controls">
-          <h1>glitchy image generator</h1>
           <div className="input-wrapper">
-            <div className="label">blending mode</div> 
+            <div className="label">mode</div> 
             <select
               className="blending-input input"
               value={blendingMode}
@@ -196,30 +215,51 @@ export default function Home() {
           </div>
 
           <div className="input-wrapper">
-            <div className="label">amount of glitches</div>
+            <div className="label">amount</div>
             <Slider
-              onChange={handleGlitchesAmountChange}
               min={0}
-              max={400}
-              valueLabelDisplay="auto"
+              max={canvasHeight}
               value={amountOfGlitches}
-              defaultValue={30}
+              onChange={debouncedhandleGlitchesAmountChange}
             />
+            <input
+              type="number"
+              className="input number-input"
+              min={0}
+              max={canvasHeight}
+              value={amountOfGlitches}
+              onChange={handleGlitchesAmountChange}/>
           </div>
           
           <div className="input-wrapper">
-            <div className="label">glitch opacity</div> 
+            <div className="label">opacity</div> 
             <Slider
-              onChange={handleOpacityChange}
               min={0}
               max={1}
               step={0.1}
-              placeholder="Between 0 and 1"
-              valueLabelDisplay="auto"
-              defaultValue={0.4}
+              value={opacity}
+              onChange={handleOpacityChange}
             />
+            <input
+              type="number"
+              className="input number-input"
+              min={0}
+              max={1}
+              step={0.1}
+              value={opacity}
+              onChange={handleOpacityChange}/>
           </div>
-          <div className="buttons-wrapper"></div>
+        </div>
+
+        <canvas id="canvas"></canvas>
+        
+        <input
+          id="file-input"
+          type="file"
+          accept="image/*"
+        />
+        
+        <div className="buttons-wrapper">
           <button className="generate-button" onClick={onGenerateClick}>
             generate
           </button>
@@ -230,11 +270,6 @@ export default function Home() {
             upload
           </button>
         </div>
-        <input
-          id="file-input"
-          type="file"
-          accept="image/*"
-        />
       </main>
     </div>
   )

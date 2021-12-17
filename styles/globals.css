@@ -1,11 +1,43 @@
-html,
-body {
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font-family: inherit;
+  vertical-align: baseline;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+  background: white;
   --text-shadow: 0 1px rgb(0 0 0 / 14%);
   --box-shadow: 0 15px 20px -3px rgba(0,0,0,.2),0 2px 10px -2px rgba(0,0,0,.2);
-  padding: 0;
+}
+
+body {
+  font-family: 'Fira Code', monospace;;
+  height: 100%;
+  font-size: 14px;
+  line-height: 1.5;
+  color: black;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+main, article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+input, select {
+  font-size: 14px;
+}
+
+body {
   margin: 0;
   font-family: 'Fira Code', monospace;
-  /* background-color: #222; */
 }
 
 * {
@@ -13,28 +45,28 @@ body {
 }
 
 main {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 40px;
 }
 
 .controls {
-  position: fixed;
-  right: 24px;
-  top: 24px;
-  border-radius: 5px;
-  width: 260px;
-  background: rgba(34, 34, 34, 0.96);
-  padding: 20px;
-  z-index: 100;
-  box-shadow: var(--box-shadow);
-}
-
-canvas {
-  margin: 24px;
-  border-radius: 5px;
+  display: flex;
+  margin-top: 30px;
+  width: 100%;
+  max-width: 940px;
+  padding-left: 30px;
+  padding-right: 30px;
+  margin-bottom: 30px;
 }
 
 .buttons-wrapper {
-  margin-top: 20px;
+  display: flex;
+  position: fixed;
+  bottom: 20px;
 }
 
 button {
@@ -45,14 +77,11 @@ button {
   height: 40px;
   padding-left: 20px;
   padding-right: 20px;
-  color: white;
-  background-color: rgb(255 255 255 / 30%);
+  color: #111111;
   font-weight: bold;
   box-shadow: none;
   border-color: transparent;
   border-radius: 5px;
-  width: 100%;
-  box-shadow: var(--text-shadow);
 }
 
 button:hover {
@@ -60,48 +89,75 @@ button:hover {
 }
 
 button + button {
-  margin-top: 20px;
+  margin-left: 20px;
+  background: white;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
 .input-wrapper + .input-wrapper {
-  margin-top: 20px;
+  margin-left: 30px;
 }
 
 .input {
   font-family: 'Fira Code', monospace;
-  width: 100%;
-  height: 40px;
+  height: 32px;
   outline: none;
   padding-left: 10px;
   padding-right: 10px;
   border-radius: 5px;
   border: none;
-  box-shadow: var(--text-shadow);
   background: rgb(255 255 255 / 26%);
-  color: white;
+  border: 1px solid #DDDDDD;
 }
 
 h1 {
   font-family: 'Fira Code', monospace;
-  font-size: 28px;
-  margin-top: 0;
-  padding-bottom: 20px;
-  padding-right: 20px;
-  border-bottom: 1px solid rgba(255, 225, 225, 0.5);
-  color: #111111;
+  text-align: center;
+  font-size: 20px;
+  margin-top: 40px;
+  padding-left: 30px;
+  padding-right: 30px;
   margin-bottom: 24px;
-  text-shadow: var(--text-shadow);
-  color: white;
+  color: #111111;
+  font-family: 'Press Start 2P', sans-serif;
 }
 
 .label {
   font-size: 14px;
-  margin-bottom: 8px;
+  margin-right: 14px;
   font-weight: 500;
-  color: white;
-  text-shadow: var(--text-shadow);
+  color: #111111;
+}
+
+.number-input { 
+  min-width: 70px;
+  margin-left: 16px;
 }
 
 #file-input {
   display: none;
+}
+
+.css-187mznn-MuiSlider-root {
+  color: #FF3ED4;
+  height: 3px;
+}
+
+select {
+  width: 100%;
+  box-shadow: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
 }
