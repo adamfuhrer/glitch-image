@@ -1,16 +1,18 @@
 import Head from 'next/head'
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Slider from '@mui/material/Slider';
 import debounce from 'lodash.debounce';
 
 var ctx;
 var canvas;
-var glitchesArray = [];
+var sp = 26;
+var canvasWidth;
+var canvasHeight;
 
 export default function Home() {
   const blendingModes = [
-    "difference",
     "source-atop",
+    "difference",
     "source-over",
     "destination-out",
     "multiply",
@@ -26,19 +28,18 @@ export default function Home() {
     "luminosity"
   ];
 
+  const canvasRef = useRef(null)
+  const fileUploadRef = useRef(null)
   const [blendingMode, setBlendingMode] = useState(blendingModes[0]);
-  const [opacity, setOpacity] = useState(0.8);
-  const [amountOfGlitches, setAmountOfGlitches] = useState(40);
+  const [opacity, setOpacity] = useState(1);
+  const [amountOfGlitches, setAmountOfGlitches] = useState(2);
   const [imgSrc, setImgSrc] = useState("https://picdit.files.wordpress.com/2016/04/erik-jones-art-7.png");
-  const [canvasWidth, setCanvasWidth] = useState();
-  const [canvasHeight, setCanvasHeight] = useState();
 
   useEffect(() => {
     onGenerateClick();
-  });
+  }, [imgSrc, blendingMode, opacity, amountOfGlitches]);
 
-  function Glitch(img, sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
-    this.img = img;
+  function Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
     this.sourceX = sourceX;
     this.sourceY = sourceY;
     this.glitchWidth = glitchWidth;
@@ -47,7 +48,7 @@ export default function Home() {
 
     this.draw = () => {
       ctx.drawImage(
-        this.img, 
+        canvas, 
         this.sourceX,
         this.sourceY,
         this.glitchWidth,
@@ -61,50 +62,65 @@ export default function Home() {
   }
 
   function setupGlitches() {
-    glitchesArray = [];
     let sourceY = 0;
     let glitchHeight = canvasHeight / amountOfGlitches
 
     for (let i = 0; i < amountOfGlitches; i++) {
-      let img = document.createElement("img");
-      img.src = imgSrc;
-
       let sourceX = randomNum(0, 300);
       let glitchWidth = randomNum(20, canvasWidth);
-      let destinationX = randomNum(0, canvasWidth / 1.5);
+      let destinationX = randomNum(0, canvasWidth / 1.25);
 
-      glitchesArray[i] = new Glitch(img, sourceX, sourceY, glitchWidth, Number(glitchHeight), destinationX) 
+      let glitch = new Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
       sourceY = sourceY + Number(glitchHeight);
+      glitch.draw();
     } 
   }
 
   function onGenerateClick() {
-    console.log("calling generate")
+    console.log("calling onGenerateClick()");
+    canvas = canvasRef.current;
+    
     let img = document.createElement("img");
     img.src = imgSrc;
     
     img.onload = () => {
-      canvas = document.getElementById("canvas");
-
-      setCanvasWidth(img.width);
-      setCanvasHeight(img.height);
-
-      if (amountOfGlitches > canvasHeight) {
-        setAmountOfGlitches(canvasHeight);
+      // canvas resizing from: https://github.com/constraint-systems/collapse/blob/master/pages/index.js
+      let aspect = img.width / img.height;
+      let window_aspect = (window.innerWidth - sp) / (window.innerHeight - sp * 8);
+      let snapw, snaph;
+      if (aspect < window_aspect) {
+        let adj_height = Math.min(
+          img.height,
+          Math.floor(window.innerHeight - sp * 8)
+        )
+        snaph = Math.round(adj_height / sp) * sp
+        let snapr = snaph / img.height
+        snapw = Math.round((img.width * snapr) / sp) * sp
+      } else {
+        let adj_width = Math.min(
+          img.width,
+          Math.floor(window.innerWidth - sp) - sp / 2
+        )
+        snapw = Math.round(adj_width / sp) * sp
+        let snapr = snapw / img.width
+        snaph = Math.round((img.height * snapr) / sp) * sp
       }
 
-      canvas.width = img.width;
-      canvas.height = img.height;
-  
+      img.width = snapw
+      img.height = snaph
+
+      canvas.width = snapw;
+      canvas.height = snaph;
+
+      canvasWidth = snapw;
+      canvasHeight = snaph;
+
       ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
       ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
       
       ctx.globalAlpha = Number(opacity);
       ctx.globalCompositeOperation = blendingMode;
-  
       setupGlitches();
-      drawGlitches();
     }
   }
 
@@ -129,7 +145,7 @@ export default function Home() {
   }
 
   function loadImage() {
-    let input = document.querySelector('#file-input')
+    let input = fileUploadRef.current;
     
     function handleChange(e) {
       for (let item of this.files) {
@@ -138,7 +154,6 @@ export default function Home() {
         }
         let src = URL.createObjectURL(item)
         setImgSrc(src);
-        onGenerateClick();
         this.removeEventListener('change', handleChange)
       }
     }
@@ -151,12 +166,6 @@ export default function Home() {
         view: window,
       })
     )
-  }
-
-  function drawGlitches() {
-    glitchesArray.forEach((glitch) => {
-      glitch.draw();
-    });
   }
 
   function handleCompositeOperationChange(event) {
@@ -250,24 +259,22 @@ export default function Home() {
               onChange={handleOpacityChange}/>
           </div>
         </div>
-
-        <canvas id="canvas"></canvas>
-        
+        <canvas ref={canvasRef}></canvas>
         <input
+          ref={fileUploadRef}
           id="file-input"
           type="file"
           accept="image/*"
         />
-        
         <div className="buttons-wrapper">
           <button className="generate-button" onClick={onGenerateClick}>
             generate
           </button>
           <button className="generate-button" onClick={onDownloadClick}>
-            download
+            save as png
           </button>
           <button className="generate-button" onClick={loadImage}>
-            upload
+            load image
           </button>
         </div>
       </main>
