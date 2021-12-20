@@ -7,12 +7,20 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   vertical-align: baseline;
 }
 
+input:hover, select:hover {
+  cursor: pointer;
+}
+
 html {
   font-size: 62.5%;
   box-sizing: border-box;
-  background: white;
+  background: #272a37;
   --text-shadow: 0 1px rgb(0 0 0 / 14%);
   --box-shadow: 0 15px 20px -3px rgba(0,0,0,.2),0 2px 10px -2px rgba(0,0,0,.2);
+  --white-background: rgba(255, 255, 255, 0.2);
+  --white-border: rgba(255, 255, 255, 0.3);
+  --controls-max-width: 1000px;
+  --input-color: #52555F;
 }
 
 body {
@@ -20,7 +28,7 @@ body {
   height: 100%;
   font-size: 14px;
   line-height: 1.5;
-  color: black;
+  color: white;
 }
 
 *, *:before, *:after {
@@ -33,6 +41,7 @@ main, article, aside, details, figcaption, figure, footer, header, hgroup, menu,
 
 input, select {
   font-size: 14px;
+  box-shadow: var(--text-shadow)
 }
 
 body {
@@ -50,7 +59,7 @@ main {
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 40px;
+  margin-bottom: 60px;
 }
 
 .controls {
@@ -58,9 +67,9 @@ main {
   margin-top: 20px;
   margin-bottom: 20px;
   width: 100%;
-  max-width: 960px;
-  padding-left: 30px;
-  padding-right: 30px;
+  max-width: var(--controls-max-width);
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .buttons-wrapper {
@@ -71,10 +80,10 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #F5F5F5;
+  background: var(--input-color);
   display: flex;
   position: fixed;
-  border-top: 1px solid #DDDDDD;
+  border-top: 1px solid var(--white-border);
 }
 
 button {
@@ -82,22 +91,53 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  height: 40px;
   background: transparent;
-  padding-left: 18px;
-  padding-right: 18px;
-  color: #111111;
+  color: white;
   font-weight: 500;
   box-shadow: none;
-  border-color: transparent;
+  border: none;
   border-radius: 3px;
   font-size: 14px;
+  transition: color 0.2s ease;
+  text-shadow: var(--text-shadow);
 }
 
-button:hover {
+button:hover,
+a:hover {
   cursor: pointer;
-  transition: ease;
-  /* background: #F7F7F7; */
+  color: #FF3ED4;
+  transition: color 0.2s ease;
+}
+
+a {
+  color: white;
+  transition: color 0.2s ease;
+}
+
+button.main-button {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+button.main-button svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+a.info-button {
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+}
+
+a.info-button svg {
+  width: 16px;
+  height: 16px;
 }
 
 button + button {
@@ -114,6 +154,10 @@ button + button {
   margin-left: 30px;
 }
 
+.input-wrapper.glitches-amount {
+  flex: 1.5;
+}
+
 .input {
   font-family: 'Fira Code', monospace;
   height: 32px;
@@ -121,27 +165,30 @@ button + button {
   padding-left: 10px;
   padding-right: 10px;
   border-radius: 5px;
-  background: white;
-  border: 1px solid #DDDDDD;
+  background: var(--input-color);
+  border: 1px solid var(--white-border);
+  color: white;
 }
 
 h1 {
-  font-family: 'Fira Code', monospace;
+  font-family: 'Press Start 2P', sans-serif;
   text-align: center;
-  font-size: 20px;
-  margin-top: 30px;
+  font-size: 18px;
+  margin-top: 26px;
   padding-left: 30px;
   padding-right: 30px;
   margin-bottom: 10px;
-  color: #111111;
-  font-family: 'Press Start 2P', sans-serif;
+  color: white;
+  text-shadow: var(--text-shadow);
+  letter-spacing: 1px;
 }
 
 .label {
   font-size: 14px;
   margin-right: 14px;
   font-weight: 500;
-  color: #111111;
+  color: white;
+  text-shadow: var(--text-shadow)
 }
 
 .number-input { 
@@ -170,4 +217,21 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
+}
+
+@media (max-width: 1040px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .input-wrapper + .input-wrapper {
+    margin-left: 0px;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 500px) {
+  .main-button span {
+    display: none;
+  }
 }

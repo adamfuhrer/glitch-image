@@ -4,17 +4,24 @@ import Slider from '@mui/material/Slider';
 import debounce from 'lodash.debounce';
 
 var ctx;
+var img;
 var canvas;
-var sp = 26;
+var sp = 24;
 var canvasWidth;
 var canvasHeight;
 
 export default function Home() {
   const blendingModes = [
+    // "source-in",
+    // "source-out",
     "source-atop",
-    "difference",
-    "source-over",
+    // "destination-over",
+    // "destination-in",
     "destination-out",
+    // "destination-atop",
+    "lighter",
+    // "copy",
+    "xor",
     "multiply",
     "screen",
     "overlay",
@@ -22,9 +29,12 @@ export default function Home() {
     "lighten",
     "color-dodge",
     "color-burn",
+    "hard-light",
+    "soft-light",
+    "difference",
     "exclusion",
     "hue",
-    "saturation",
+    "color",
     "luminosity"
   ];
 
@@ -32,8 +42,9 @@ export default function Home() {
   const fileUploadRef = useRef(null)
   const [blendingMode, setBlendingMode] = useState(blendingModes[0]);
   const [opacity, setOpacity] = useState(1);
-  const [amountOfGlitches, setAmountOfGlitches] = useState(2);
-  const [imgSrc, setImgSrc] = useState("https://picdit.files.wordpress.com/2016/04/erik-jones-art-7.png");
+  const [amountOfGlitches, setAmountOfGlitches] = useState(80);
+  const [imgSrc, setImgSrc] = useState("test-image.jpeg");
+  const [imgHeight, setImgHeight] = useState(0);
 
   useEffect(() => {
     onGenerateClick();
@@ -68,11 +79,11 @@ export default function Home() {
     for (let i = 0; i < amountOfGlitches; i++) {
       let sourceX = randomNum(0, 300);
       let glitchWidth = randomNum(20, canvasWidth);
-      let destinationX = randomNum(0, canvasWidth / 1.25);
+      let destinationX = randomNum(0, canvasWidth / 1.5);
 
       let glitch = new Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
-      sourceY = sourceY + Number(glitchHeight);
       glitch.draw();
+      sourceY = sourceY + Number(glitchHeight);
     } 
   }
 
@@ -80,7 +91,7 @@ export default function Home() {
     console.log("calling onGenerateClick()");
     canvas = canvasRef.current;
     
-    let img = document.createElement("img");
+    img = document.createElement("img");
     img.src = imgSrc;
     
     img.onload = () => {
@@ -115,8 +126,11 @@ export default function Home() {
       canvasWidth = snapw;
       canvasHeight = snaph;
 
+      setImgHeight(canvasHeight)
+
       ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+
       
       ctx.globalAlpha = Number(opacity);
       ctx.globalCompositeOperation = blendingMode;
@@ -221,9 +235,16 @@ export default function Home() {
                 return <option value={mode} key={mode}>{mode}</option>
               })}
             </select>
+            <a className="info-button" href={"https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation"} target="_blank"  rel="noreferrer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-info">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </a>
           </div>
 
-          <div className="input-wrapper">
+          <div className="input-wrapper glitches-amount">
             <div className="label">amount</div>
             <Slider
               min={0}
@@ -267,14 +288,29 @@ export default function Home() {
           accept="image/*"
         />
         <div className="buttons-wrapper">
-          <button className="generate-button" onClick={onGenerateClick}>
-            generate
+          <button className="main-button" onClick={onGenerateClick}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>generate</span>
           </button>
-          <button className="generate-button" onClick={onDownloadClick}>
-            save as png
+          <button className="main-button" onClick={loadImage}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-upload">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>load image</span>
           </button>
-          <button className="generate-button" onClick={loadImage}>
-            load image
+          <button className="main-button" onClick={onDownloadClick}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>save as png</span>
           </button>
         </div>
       </main>
