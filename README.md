@@ -1,4 +1,4 @@
-## Glitch Image Generator
+# Glitch Image Generator
 
 A generative tool which allows you to create and save unique glitchy images
 
