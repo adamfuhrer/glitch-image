@@ -257,6 +257,22 @@ textarea:focus {
   color: #ff89e5;
 }
 
+.github-link {
+  color: white;
+}
+
+.github-link svg {
+  fill: white;
+  width: 18px;
+  height: 18px;
+  transition: fill 0.2s ease;
+}
+
+.github-link:hover svg {
+  fill: var(--pink);
+  transition: fill 0.2s ease;
+}
+
 @media (max-width: 880px) {
   .controls {
     flex-direction: column;
