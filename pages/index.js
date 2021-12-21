@@ -124,9 +124,9 @@ export default function Home() {
     let glitchHeight = canvasHeight / amountOfGlitches
 
     for (let i = 0; i < amountOfGlitches; i++) {
-      let sourceX = randomNum(0, 300);
+      let sourceX = randomNum(0, canvasWidth / 2);
       let glitchWidth = randomNum(20, canvasWidth);
-      let destinationX = randomNum(0, canvasWidth / 1.5);
+      let destinationX = randomNum(0, canvasWidth / 1.75);
 
       glitches[i] = new Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
       sourceY = sourceY + Number(glitchHeight);
@@ -290,18 +290,16 @@ export default function Home() {
       </Head>
       <main>
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-1PBNY7TB64"
+          src="https://www.googletagmanager.com/gtag/js?id=G-K6GJQFZRFP"
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
-            function gtag(){ 
-              dataLayer.push(arguments);
-            }
+            function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-        
-            gtag('config', 'G-1PBNY7TB64');
+          
+            gtag('config', 'G-K6GJQFZRFP');
           `}
         </Script>
         <ThemeProvider theme={theme}>
@@ -408,10 +406,10 @@ export default function Home() {
           {isAboutVisible &&
             <div ref={ref} className="about-section">
               <div>
-                a tool that allows you to generate and save unique glitchy images
+                a generative tool which allows you to create and save unique glitchy images
               </div>
               <div>
-                for more glitchy art: <a href="https://glitchart.io/" target="_blank" rel="noreferrer">glitchart.io</a>
+                another generative glitch tool: <a href="https://glitchart.io/" target="_blank" rel="noreferrer">glitchart.io</a>
               </div>
               <div>
                 project by <a href="https://adamfuhrer.com/" target="_blank" rel="noreferrer">adam fuhrer</a>

@@ -236,7 +236,7 @@ textarea:focus {
   top: 56px;
   right: 16px;
   padding: 20px;
-  width: 260px;
+  width: 270px;
   background: var(--input-color);
   border-radius: 8px;
   font-weight: 500;
@@ -244,7 +244,7 @@ textarea:focus {
 }
 
 .about-section div + div {
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .about-section a {
