@@ -1,7 +1,9 @@
-import Head from 'next/head'
+import Head from 'next/head';
+import Script from 'next/script';
 import { useEffect, useState, useCallback, useRef } from "react";
-import Slider from '@mui/material/Slider';
 import debounce from 'lodash.debounce';
+import Slider from '@mui/material/Slider';
+import { createTheme, ThemeProvider } from '@mui/material';
 
 var ctx;
 var img;
@@ -9,11 +11,49 @@ var canvas;
 var sp = 24;
 var canvasWidth;
 var canvasHeight;
+var glitches = [];
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#FF3ED4",
+    },
+  },
+});
+
+function useAboutVisible(initialIsVisible) {
+  const [isAboutVisible, setIsAboutVisible] = useState(initialIsVisible);
+  const ref = useRef(null);
+
+  const handleHide = (event) => {
+    if (event.key === "Escape") {
+      setIsAboutVisible(false);
+    }
+  };
+
+  const handleClickOutside = event => {
+    if (ref.current && !ref.current.contains(event.target)) {
+      setIsAboutVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleHide, true);
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("keydown", handleHide, true);
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  });
+
+  return { ref, isAboutVisible, setIsAboutVisible };
+}
 
 export default function Home() {
   const blendingModes = [
     // "source-in",
     // "source-out",
+    "difference",
     "source-atop",
     // "destination-over",
     // "destination-in",
@@ -21,7 +61,7 @@ export default function Home() {
     // "destination-atop",
     "lighter",
     // "copy",
-    "xor",
+    // "xor",
     "multiply",
     "screen",
     "overlay",
@@ -31,7 +71,6 @@ export default function Home() {
     "color-burn",
     "hard-light",
     "soft-light",
-    "difference",
     "exclusion",
     "hue",
     "color",
@@ -40,24 +79,31 @@ export default function Home() {
 
   const canvasRef = useRef(null)
   const fileUploadRef = useRef(null)
-  const [blendingMode, setBlendingMode] = useState(blendingModes[0]);
+  const [blendingMode, setBlendingMode] = useState("difference");
   const [opacity, setOpacity] = useState(1);
   const [amountOfGlitches, setAmountOfGlitches] = useState(80);
   const [imgSrc, setImgSrc] = useState("test-image.jpeg");
   const [imgHeight, setImgHeight] = useState(0);
+  const { ref, isAboutVisible, setIsAboutVisible } = useAboutVisible(false);
+
+  useEffect(() => {
+    onGenerateClick(true);
+  }, [imgSrc, amountOfGlitches]);
 
   useEffect(() => {
     onGenerateClick();
-  }, [imgSrc, blendingMode, opacity, amountOfGlitches]);
+  }, [opacity, blendingMode]);
 
-  function Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
-    this.sourceX = sourceX;
-    this.sourceY = sourceY;
-    this.glitchWidth = glitchWidth;
-    this.glitchHeight = glitchHeight
-    this.destinationX = destinationX;
+  class Glitch {
+    constructor(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
+      this.sourceX = sourceX;
+      this.sourceY = sourceY;
+      this.glitchWidth = glitchWidth;
+      this.glitchHeight = glitchHeight
+      this.destinationX = destinationX;
+    }
 
-    this.draw = () => {
+    draw = () => {
       ctx.drawImage(
         canvas, 
         this.sourceX,
@@ -73,6 +119,7 @@ export default function Home() {
   }
 
   function setupGlitches() {
+    glitches = [];
     let sourceY = 0;
     let glitchHeight = canvasHeight / amountOfGlitches
 
@@ -81,16 +128,13 @@ export default function Home() {
       let glitchWidth = randomNum(20, canvasWidth);
       let destinationX = randomNum(0, canvasWidth / 1.5);
 
-      let glitch = new Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
-      glitch.draw();
+      glitches[i] = new Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
       sourceY = sourceY + Number(glitchHeight);
     } 
   }
 
-  function onGenerateClick() {
-    console.log("calling onGenerateClick()");
+  function onGenerateClick(setup = false) {
     canvas = canvasRef.current;
-    
     img = document.createElement("img");
     img.src = imgSrc;
     
@@ -117,24 +161,30 @@ export default function Home() {
         snaph = Math.round((img.height * snapr) / sp) * sp
       }
 
-      img.width = snapw
-      img.height = snaph
-
+      img.width = snapw;
+      img.height = snaph;
       canvas.width = snapw;
       canvas.height = snaph;
-
       canvasWidth = snapw;
       canvasHeight = snaph;
 
-      setImgHeight(canvasHeight)
-
-      ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
-
+      setImgHeight(canvasHeight);
       
+      if (setup) {
+        setupGlitches();
+      }
+
+      canvas = canvasRef.current;
+      ctx = canvas.getContext("2d");
+      ctx.clearRect( 0, 0, canvasWidth, canvasHeight);
+      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
       ctx.globalAlpha = Number(opacity);
       ctx.globalCompositeOperation = blendingMode;
-      setupGlitches();
+  
+      // Draw glitches on the canvas
+      glitches.forEach(glitch => {
+        glitch.draw();
+      });
     }
   }
 
@@ -202,8 +252,12 @@ export default function Home() {
     }
   }
 
-  const debouncedhandleGlitchesAmountChange = useCallback(
-    debounce(handleGlitchesAmountChange, 30)
+  const debouncedHandleGlitchesAmountChange = useCallback(
+    debounce(handleGlitchesAmountChange, 20)
+  , []);
+
+  const debouncedHandleOpacityChange = useCallback(
+    debounce(handleOpacityChange, 20)
   , []);
   
   function randomNum(min, max) {
@@ -213,106 +267,157 @@ export default function Home() {
   return (
     <div>
       <Head>
+        <base href="/"></base>
         <title>Glitch Image Generator</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖼️</text></svg>"></link>
         <link rel="preconnect" href="https://fonts.googleapis.com"/>
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet"/>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta name="description" content="Generate and save unique glitchy images"/>
+        <meta name="keywords" content="art, design, generator, artwork, color, glitch, generative, generate"/>
+
+        <meta property="og:url" content="https://www.glitchyimage.com"/>
+        <meta property="og:title" content="Glitch Image Generator"/>
+        <meta property="og:description" content="Generate and save unique glitchy images"/>
+
+        <meta property="og:image" content="https://www.glitchyimage.com/glitch-vintage.jpeg"/>
+        <meta property="og:site_name" content="Glitch Image Generator"/>
+        <meta name="twitter:card" content="summary_large_image"/>
       </Head>
       <main>
-        <h1>glitch image generator</h1>
-        <div className="controls">
-          <div className="input-wrapper">
-            <div className="label">mode</div> 
-            <select
-              className="blending-input input"
-              value={blendingMode}
-              name="blending-mode"
-              onChange={handleCompositeOperationChange}
-            >
-              {blendingModes.map((mode) => {
-                return <option value={mode} key={mode}>{mode}</option>
-              })}
-            </select>
-            <a className="info-button" href={"https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation"} target="_blank"  rel="noreferrer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-info">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-1PBNY7TB64"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){ 
+              dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+        
+            gtag('config', 'G-1PBNY7TB64');
+          `}
+        </Script>
+        <ThemeProvider theme={theme}>
+          <h1>glitch image generator</h1>
+          <div className="controls">
+            <div className="input-wrapper">
+              <div className="label">mode</div> 
+              <select
+                className="blending-input input"
+                value={blendingMode}
+                name="blending-mode"
+                onChange={handleCompositeOperationChange}
+              >
+                {blendingModes.map((mode) => {
+                  return <option value={mode} key={mode}>{mode}</option>
+                })}
+              </select>
+              <a className="info-button" href={"https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation"} target="_blank"  rel="noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-info">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </a>
+            </div>
+
+            <div className="input-wrapper glitches-amount">
+              <div className="label">amount</div>
+              <Slider
+                min={0}
+                max={canvasHeight}
+                value={amountOfGlitches}
+                color="primary"
+                onChange={debouncedHandleGlitchesAmountChange}
+              />
+              <input
+                type="number"
+                className="input number-input"
+                min={0}
+                max={canvasHeight}
+                value={amountOfGlitches}
+                onChange={handleGlitchesAmountChange}/>
+            </div>
+            
+            <div className="input-wrapper">
+              <div className="label">opacity</div> 
+              <Slider
+                min={0}
+                max={1}
+                step={0.1}
+                value={opacity}
+                color="primary"
+                onChange={debouncedHandleOpacityChange}
+              />
+              <input
+                type="number"
+                className="input number-input"
+                min={0}
+                max={1}
+                step={0.1}
+                value={opacity}
+                onChange={handleOpacityChange}/>
+            </div>
+          </div>
+          <canvas ref={canvasRef}></canvas>
+          <input
+            ref={fileUploadRef}
+            id="file-input"
+            type="file"
+            accept="image/*"
+          />
+          <div className="buttons-wrapper">
+            <button className="main-button" onClick={onGenerateClick}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
               </svg>
-            </a>
+              <span>generate</span>
+            </button>
+            <button className="main-button" onClick={loadImage}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-upload">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>load image</span>
+            </button>
+            <button className="main-button" onClick={onDownloadClick}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>save as png</span>
+            </button>
           </div>
 
-          <div className="input-wrapper glitches-amount">
-            <div className="label">amount</div>
-            <Slider
-              min={0}
-              max={canvasHeight}
-              value={amountOfGlitches}
-              onChange={debouncedhandleGlitchesAmountChange}
-            />
-            <input
-              type="number"
-              className="input number-input"
-              min={0}
-              max={canvasHeight}
-              value={amountOfGlitches}
-              onChange={handleGlitchesAmountChange}/>
-          </div>
-          
-          <div className="input-wrapper">
-            <div className="label">opacity</div> 
-            <Slider
-              min={0}
-              max={1}
-              step={0.1}
-              value={opacity}
-              onChange={handleOpacityChange}
-            />
-            <input
-              type="number"
-              className="input number-input"
-              min={0}
-              max={1}
-              step={0.1}
-              value={opacity}
-              onChange={handleOpacityChange}/>
-          </div>
-        </div>
-        <canvas ref={canvasRef}></canvas>
-        <input
-          ref={fileUploadRef}
-          id="file-input"
-          type="file"
-          accept="image/*"
-        />
-        <div className="buttons-wrapper">
-          <button className="main-button" onClick={onGenerateClick}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-refresh-cw">
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <polyline points="1 20 1 14 7 14"></polyline>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          <button className="about-button" onClick={() => setIsAboutVisible(true)}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-help-circle">
+              <circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
-            <span>generate</span>
           </button>
-          <button className="main-button" onClick={loadImage}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-upload">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            <span>load image</span>
-          </button>
-          <button className="main-button" onClick={onDownloadClick}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span>save as png</span>
-          </button>
-        </div>
+          {isAboutVisible &&
+            <div ref={ref} className="about-section">
+              <div>
+                a tool that allows you generate and save unique glitchy images
+              </div>
+              <div>
+                for more glitchy art: <a href="https://glitchart.io/" target="_blank" rel="noreferrer">glitchart.io</a>
+              </div>
+              <div>
+                project by <a href="https://adamfuhrer.com/" target="_blank" rel="noreferrer">adam fuhrer</a>
+              </div>
+            </div>
+          }
+        </ThemeProvider>
       </main>
     </div>
   )

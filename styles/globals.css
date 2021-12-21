@@ -21,6 +21,7 @@ html {
   --white-border: rgba(255, 255, 255, 0.3);
   --controls-max-width: 1000px;
   --input-color: #52555F;
+  --pink: #FF3ED4;
 }
 
 body {
@@ -59,7 +60,7 @@ main {
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 60px;
+  margin-bottom: 46px;
 }
 
 .controls {
@@ -76,14 +77,13 @@ main {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 44px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
   background: var(--input-color);
   display: flex;
   position: fixed;
-  border-top: 1px solid var(--white-border);
 }
 
 button {
@@ -106,7 +106,7 @@ button {
 button:hover,
 a:hover {
   cursor: pointer;
-  color: #FF3ED4;
+  color: var(--pink);
   transition: color 0.2s ease;
 }
 
@@ -200,11 +200,6 @@ h1 {
   display: none;
 }
 
-.css-187mznn-MuiSlider-root {
-  color: #FF3ED4;
-  height: 3px;
-}
-
 select {
   width: 100%;
   box-shadow: none;
@@ -219,7 +214,50 @@ textarea:focus {
   outline: none;
 }
 
-@media (max-width: 1040px) {
+.about-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  border-radius: 50%;
+  background: var(--input-color);
+  color: white;
+  width: 30px;
+  height: 30px;
+  box-shadow: var(--text-shadow);
+}
+
+.about-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.about-section {
+  position: absolute;
+  top: 56px;
+  right: 16px;
+  padding: 20px;
+  width: 260px;
+  background: var(--input-color);
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: var(--text-shadow);
+}
+
+.about-section div + div {
+  margin-top: 16px;
+}
+
+.about-section a {
+  text-decoration: none;
+  color: var(--pink);
+  text-shadow: var(--text-shadow);
+}
+
+.about-section a:hover {
+  color: #ff89e5;
+}
+
+@media (max-width: 880px) {
   .controls {
     flex-direction: column;
   }
