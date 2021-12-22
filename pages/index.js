@@ -8,7 +8,7 @@ import { createTheme, ThemeProvider } from '@mui/material';
 var ctx;
 var img;
 var canvas;
-var sp = 24;
+var sp = 25;
 var canvasWidth;
 var canvasHeight;
 var glitches = [];

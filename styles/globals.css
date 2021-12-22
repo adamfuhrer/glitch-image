@@ -16,7 +16,7 @@ html {
   box-sizing: border-box;
   background: #272a37;
   --text-shadow: 0 1px rgb(0 0 0 / 14%);
-  --box-shadow: 0 15px 20px -3px rgba(0,0,0,.2),0 2px 10px -2px rgba(0,0,0,.2);
+  --box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
   --white-background: rgba(255, 255, 255, 0.2);
   --white-border: rgba(255, 255, 255, 0.3);
   --controls-max-width: 1000px;
@@ -38,6 +38,10 @@ body {
 
 main, article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
   display: block;
+}
+
+canvas {
+  box-shadow: var(--box-shadow);
 }
 
 input, select {
@@ -151,7 +155,7 @@ button + button {
 }
 
 .input-wrapper + .input-wrapper {
-  margin-left: 30px;
+  margin-left: 32px;
 }
 
 .input-wrapper.glitches-amount {
@@ -173,11 +177,11 @@ button + button {
 h1 {
   font-family: 'Press Start 2P', sans-serif;
   text-align: center;
-  font-size: 18px;
+  font-size: 20px;
   margin-top: 26px;
   padding-left: 30px;
   padding-right: 30px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   color: white;
   text-shadow: var(--text-shadow);
   letter-spacing: 1px;
@@ -223,7 +227,7 @@ textarea:focus {
   color: white;
   width: 30px;
   height: 30px;
-  box-shadow: var(--text-shadow);
+  box-shadow: var(--box-shadow);
 }
 
 .about-button svg {
@@ -235,12 +239,12 @@ textarea:focus {
   position: absolute;
   top: 56px;
   right: 16px;
-  padding: 20px;
-  width: 270px;
+  padding: 24px;
+  width: 280px;
   background: var(--input-color);
   border-radius: 8px;
   font-weight: 500;
-  box-shadow: var(--text-shadow);
+  box-shadow: var(--box-shadow);
 }
 
 .about-section div + div {
@@ -250,7 +254,6 @@ textarea:focus {
 .about-section a {
   text-decoration: none;
   color: var(--pink);
-  text-shadow: var(--text-shadow);
 }
 
 .about-section a:hover {
@@ -258,6 +261,7 @@ textarea:focus {
 }
 
 .github-link {
+  display: inline-flex;
   color: white;
 }
 
