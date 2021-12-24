@@ -4,11 +4,10 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import debounce from 'lodash.debounce';
 import Slider from '@mui/material/Slider';
 import { createTheme, ThemeProvider } from '@mui/material';
-import Image from "next/image";
 
-var ctx;
 var img;
 var canvas;
+var ctx;
 var sp = 25;
 var canvasWidth;
 var canvasHeight;

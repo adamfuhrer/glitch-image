@@ -1,3 +1,17 @@
+:root {
+  --text-shadow: 0 1px rgb(0 0 0 / 30%);
+  --box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
+  --pink: #FF3ED4;
+  --white-background: rgba(255, 255, 255, 0.2);
+  --white-border: rgba(255, 255, 255, 0.3);
+  --input-color: #52555F;
+  --controls-max-width: 1000px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
   margin: 0;
   padding: 0;
@@ -7,29 +21,10 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   vertical-align: baseline;
 }
 
-input:hover, select:hover {
-  cursor: pointer;
-}
-
 html {
   font-size: 62.5%;
   box-sizing: border-box;
   background: #272a37;
-  --text-shadow: 0 1px rgb(0 0 0 / 14%);
-  --box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
-  --white-background: rgba(255, 255, 255, 0.2);
-  --white-border: rgba(255, 255, 255, 0.3);
-  --controls-max-width: 1000px;
-  --input-color: #52555F;
-  --pink: #FF3ED4;
-}
-
-body {
-  font-family: 'Fira Code', monospace;
-  height: 100%;
-  font-size: 14px;
-  line-height: 1.5;
-  color: white;
 }
 
 *, *:before, *:after {
@@ -40,8 +35,10 @@ main, article, aside, details, figcaption, figure, footer, header, hgroup, menu,
   display: block;
 }
 
-canvas.loaded {
-  box-shadow: var(--box-shadow);
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
 }
 
 input, select {
@@ -49,13 +46,31 @@ input, select {
   box-shadow: var(--text-shadow)
 }
 
+input:hover, select:hover {
+  cursor: pointer;
+}
+
+body {
+  font-family: 'Fira Code', monospace;
+  height: 100%;
+  font-size: 14px;
+  line-height: 1.5;
+  color: white;
+}
+
+canvas {
+  opacity: 0;
+}
+
+canvas.loaded {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  box-shadow: var(--box-shadow);
+}
+
 body {
   margin: 0;
   font-family: 'Fira Code', monospace;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 main {
@@ -206,16 +221,8 @@ h1 {
 
 select {
   width: 100%;
-  box-shadow: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background: transparent;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
 }
 
 .about-button {
@@ -277,14 +284,14 @@ textarea:focus {
   transition: fill 0.2s ease;
 }
 
-@media (max-width: 880px) {
+@media (max-width: 840px) {
   .controls {
     flex-direction: column;
   }
 
   .input-wrapper + .input-wrapper {
     margin-left: 0px;
-    margin-top: 20px;
+    margin-top: 18px;
   }
 }
 
