@@ -1,7 +1,6 @@
 import Head from 'next/head';
 import Script from 'next/script';
-import { useEffect, useState, useCallback, useRef } from "react";
-import debounce from 'lodash.debounce';
+import { useEffect, useState, useRef } from "react";
 import Slider from '@mui/material/Slider';
 import { createTheme, ThemeProvider } from '@mui/material';
 
@@ -261,14 +260,6 @@ export default function Home() {
     }
   }
 
-  const debouncedHandleGlitchesAmountChange = useCallback(
-    debounce(handleGlitchesAmountChange, 20)
-  , []);
-
-  const debouncedHandleOpacityChange = useCallback(
-    debounce(handleOpacityChange, 20)
-  , []);
-  
   function randomNum(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
@@ -342,7 +333,7 @@ export default function Home() {
                 max={canvasHeight}
                 value={amountOfGlitches}
                 color="primary"
-                onChange={debouncedHandleGlitchesAmountChange}
+                onChange={handleGlitchesAmountChange}
               />
               <input
                 type="number"
@@ -361,7 +352,7 @@ export default function Home() {
                 step={0.1}
                 value={opacity}
                 color="primary"
-                onChange={debouncedHandleOpacityChange}
+                onChange={handleOpacityChange}
               />
               <input
                 type="number"
