@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import debounce from 'lodash.debounce';
 import Slider from '@mui/material/Slider';
 import { createTheme, ThemeProvider } from '@mui/material';
+import Image from "next/image";
 
 var ctx;
 var img;
@@ -82,9 +83,10 @@ export default function Home() {
   const [blendingMode, setBlendingMode] = useState("difference");
   const [opacity, setOpacity] = useState(1);
   const [amountOfGlitches, setAmountOfGlitches] = useState(80);
-  const [imgSrc, setImgSrc] = useState("test-image.jpeg");
+  const [imgSrc, setImgSrc] = useState("/test-image.jpeg");
   const [imgHeight, setImgHeight] = useState(0);
   const { ref, isAboutVisible, setIsAboutVisible } = useAboutVisible(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   useEffect(() => {
     onGenerateClick(true);
@@ -138,7 +140,14 @@ export default function Home() {
     img = document.createElement("img");
     img.src = imgSrc;
     
-    img.onload = () => {
+    if (img.complete) {
+      processImg()
+    } else {
+      img.onload = processImg;
+    }
+
+    function processImg() {
+      setIsImageLoaded(true)
       // canvas resizing from: https://github.com/constraint-systems/collapse/blob/master/pages/index.js
       let aspect = img.width / img.height;
       let window_aspect = (window.innerWidth - sp) / (window.innerHeight - sp * 8);
@@ -180,7 +189,8 @@ export default function Home() {
       ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
       ctx.globalAlpha = Number(opacity);
       ctx.globalCompositeOperation = blendingMode;
-  
+      ctx.imageSmoothingEnabled = false;
+
       // Draw glitches on the canvas
       glitches.forEach(glitch => {
         glitch.draw();
@@ -364,7 +374,7 @@ export default function Home() {
                 onChange={handleOpacityChange}/>
             </div>
           </div>
-          <canvas ref={canvasRef}></canvas>
+          <canvas ref={canvasRef} className={isImageLoaded ? 'loaded' : null}></canvas>
           <input
             ref={fileUploadRef}
             id="file-input"

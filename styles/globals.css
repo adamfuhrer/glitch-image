@@ -25,7 +25,7 @@ html {
 }
 
 body {
-  font-family: 'Fira Code', monospace;;
+  font-family: 'Fira Code', monospace;
   height: 100%;
   font-size: 14px;
   line-height: 1.5;
@@ -40,7 +40,7 @@ main, article, aside, details, figcaption, figure, footer, header, hgroup, menu,
   display: block;
 }
 
-canvas {
+canvas.loaded {
   box-shadow: var(--box-shadow);
 }
 
