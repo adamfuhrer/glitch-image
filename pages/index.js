@@ -80,7 +80,8 @@ export default function Home() {
   const fileUploadRef = useRef(null)
   const [blendingMode, setBlendingMode] = useState("difference");
   const [opacity, setOpacity] = useState(1);
-  const [amountOfGlitches, setAmountOfGlitches] = useState(80);
+  const [amountOfGlitches, setAmountOfGlitches] = useState(60);
+  const [maxAmountOfGlitches, setMaxAmountOfGlitches] = useState(400);
   const [imgSrc, setImgSrc] = useState("/test-image.jpeg");
   const [imgHeight, setImgHeight] = useState(0);
   const { ref, isAboutVisible, setIsAboutVisible } = useAboutVisible(false);
@@ -96,6 +97,7 @@ export default function Home() {
 
   class Glitch {
     constructor(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) {
+      this.ratio = window.devicePixelRatio || 1;
       this.sourceX = sourceX;
       this.sourceY = sourceY;
       this.glitchWidth = glitchWidth;
@@ -105,11 +107,11 @@ export default function Home() {
 
     draw = () => {
       ctx.drawImage(
-        canvas, 
-        this.sourceX,
-        this.sourceY,
-        this.glitchWidth,
-        this.glitchHeight,
+        canvas,
+        this.sourceX * this.ratio, // Scale up the source image by the devicePixelRatio
+        this.sourceY * this.ratio,
+        this.glitchWidth * this.ratio,
+        this.glitchHeight * this.ratio,
         this.destinationX,
         this.sourceY,
         this.glitchWidth,
@@ -121,7 +123,7 @@ export default function Home() {
   function setupGlitches() {
     glitches = [];
     let sourceY = 0;
-    let glitchHeight = canvasHeight / amountOfGlitches
+    let glitchHeight = canvasHeight / amountOfGlitches;
 
     for (let i = 0; i < amountOfGlitches; i++) {
       let sourceX = randomNum(0, canvasWidth / 2);
@@ -146,44 +148,28 @@ export default function Home() {
 
     function processImg() {
       setIsImageLoaded(true)
-      // canvas resizing from: https://github.com/constraint-systems/collapse/blob/master/pages/index.js
-      let aspect = img.width / img.height;
-      let window_aspect = (window.innerWidth - sp) / (window.innerHeight - sp * 8);
-      let snapw, snaph;
-      if (aspect < window_aspect) {
-        let adj_height = Math.min(
-          img.height,
-          Math.floor(window.innerHeight - sp * 8)
-        )
-        snaph = Math.round(adj_height / sp) * sp
-        let snapr = snaph / img.height
-        snapw = Math.round((img.width * snapr) / sp) * sp
-      } else {
-        let adj_width = Math.min(
-          img.width,
-          Math.floor(window.innerWidth - sp) - sp / 2
-        )
-        snapw = Math.round(adj_width / sp) * sp
-        let snapr = snapw / img.width
-        snaph = Math.round((img.height * snapr) / sp) * sp
-      }
+      const dimensions = resizeImg(img);
+      canvasWidth = dimensions.width;
+      canvasHeight = dimensions.height;
+      img.width = canvasWidth;
+      img.height = canvasHeight;
 
-      img.width = snapw;
-      img.height = snaph;
-      canvas.width = snapw;
-      canvas.height = snaph;
-      canvasWidth = snapw;
-      canvasHeight = snaph;
-
-      setImgHeight(canvasHeight);
-      
       if (setup) {
         setupGlitches();
       }
-
+      setMaxAmountOfGlitches(Math.round(canvasHeight / 2))
+      setImgHeight(canvasHeight);
+      
+      // Account for high HiDPI screens, otherwise images drawn on canvas will be slightly blurry
+      let ratio = window.devicePixelRatio || 1;
       canvas = canvasRef.current;
+      canvas.width = canvasWidth * ratio;
+      canvas.height = canvasHeight * ratio;
+      canvas.style.width = canvasWidth + 'px';
+      canvas.style.height = canvasHeight + 'px';
+
       ctx = canvas.getContext("2d");
-      ctx.clearRect( 0, 0, canvasWidth, canvasHeight);
+      ctx.scale(ratio, ratio);
       ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
       ctx.globalAlpha = Number(opacity);
       ctx.globalCompositeOperation = blendingMode;
@@ -260,6 +246,31 @@ export default function Home() {
     }
   }
 
+  // Image resizing from: https://github.com/constraint-systems/collapse/blob/master/pages/index.js
+  function resizeImg(img) {
+    let aspect = img.width / img.height;
+    let window_aspect = (window.innerWidth - sp) / (window.innerHeight - sp * 8);
+    let width, height;
+    if (aspect < window_aspect) {
+      let adj_height = Math.min(
+        img.height,
+        Math.floor(window.innerHeight - sp * 8)
+      )
+      height = Math.round(adj_height / sp) * sp
+      let snapr = height / img.height
+      width = Math.round((img.width * snapr) / sp) * sp
+    } else {
+      let adj_width = Math.min(
+        img.width,
+        Math.floor(window.innerWidth - sp) - sp / 2
+      )
+      width = Math.round(adj_width / sp) * sp
+      let snapr = width / img.width
+      height = Math.round((img.height * snapr) / sp) * sp
+    }
+    return { width, height }
+  }
+
   function randomNum(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
@@ -330,7 +341,7 @@ export default function Home() {
               <div className="label">amount</div>
               <Slider
                 min={0}
-                max={canvasHeight}
+                max={maxAmountOfGlitches}
                 value={amountOfGlitches}
                 color="primary"
                 onChange={handleGlitchesAmountChange}
@@ -339,7 +350,7 @@ export default function Home() {
                 type="number"
                 className="input number-input"
                 min={0}
-                max={canvasHeight}
+                max={maxAmountOfGlitches}
                 value={amountOfGlitches}
                 onChange={handleGlitchesAmountChange}/>
             </div>
