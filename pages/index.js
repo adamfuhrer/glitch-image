@@ -127,7 +127,7 @@ export default function Home() {
 
     for (let i = 0; i < amountOfGlitches; i++) {
       let sourceX = randomNum(0, canvasWidth / 2);
-      let glitchWidth = randomNum(20, canvasWidth);
+      let glitchWidth = randomNum(canvasWidth * 0.3, canvasWidth);
       let destinationX = randomNum(0, canvasWidth / 1.75);
 
       glitches[i] = new Glitch(sourceX, sourceY, glitchWidth, glitchHeight, destinationX) 
